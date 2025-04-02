@@ -12,34 +12,34 @@ provider "azurerm" {
 }
 
 data "azurerm_resource_group" "zadanie1_group" {
-  name = "TerraformTraining-A864148"
+  name = "TerraformTraining-${var.my_das}"
 }
 
 data "azurerm_virtual_network" "zadanie2_vn" {
-  name = "A864148VNET01"
+  name = "${var.my_das}VNET01"
   resource_group_name = data.azurerm_resource_group.zadanie1_group.name
 }
 
 data "azurerm_subnet" "subnet1" {
-  name                 = "A864148Subnet01"
+  name                 = "${var.my_das}Subnet01"
   resource_group_name  = data.azurerm_resource_group.zadanie1_group.name
   virtual_network_name = data.azurerm_virtual_network.zadanie2_vn.name
 }
 
 resource "azurerm_public_ip" "zadanie3_pub-ip" {
-  name                = "example-public-ip"
+  name                = "${var.my_das}BastionPublicIP"
   location            = data.azurerm_resource_group.zadanie1_group.location
   resource_group_name = data.azurerm_resource_group.zadanie1_group.name
   allocation_method   = "Dynamic"
 }
 
 resource "azurerm_network_interface" "main" {
-  name                = "A864148BSTNIC01"
+  name                = "${var.my_das}BSTNIC01"
   location            = data.azurerm_resource_group.zadanie1_group.location
   resource_group_name = data.azurerm_resource_group.zadanie1_group.name
 
   ip_configuration {
-    name                          = "testconfiguration1"
+    name                          = "${var.my_das}ipconfiguration"
     subnet_id                     = data.azurerm_subnet.subnet1.id
     private_ip_address_allocation = "Dynamic"
   }
