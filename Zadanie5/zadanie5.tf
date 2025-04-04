@@ -26,6 +26,8 @@ data "azurerm_subnet" "subnet2" {
   virtual_network_name = data.azurerm_virtual_network.zadanie2_vn.name
 }
 
+# Public IP for the LB
+
 resource "azurerm_public_ip" "zadanie5_lb_public_ip" {
   name                = "${var.my_das}LBPublicIP"
   location            = data.azurerm_resource_group.zadanie1_group.location
@@ -34,7 +36,7 @@ resource "azurerm_public_ip" "zadanie5_lb_public_ip" {
   sku                 = "Standard"
 }
 
-######<LB_BLOCK>######
+# Load balancer
 
 resource "azurerm_lb" "zadanie5_lb" {
   name                = "${var.my_das}LB01"
@@ -48,9 +50,7 @@ resource "azurerm_lb" "zadanie5_lb" {
   }
 }
 
-######</LB_BLOCK>######
-
-######<BACKEND_ADDRESS_POOL_BLOCK>######
+# Backend address pool
 
 resource "azurerm_lb_backend_address_pool" "zadanie5_backend_add_pool" {
   loadbalancer_id = azurerm_lb.zadanie5_lb.id
@@ -66,7 +66,23 @@ resource "azurerm_lb_probe" "zadanie5_lb_probe" {
   number_of_probes    = 2
 }
 
-######<LB_RURE_BLOCK>######
+# Backend address pool addresses (IPs of the VMs)
+
+resource "azurerm_lb_backend_address_pool_address" "backend1" {
+  name                    = "${var.my_das}LB_Add_Pool_Add01"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.zadanie5_backend_add_pool.id
+  virtual_network_id      = data.azurerm_virtual_network.zadanie2_vn.id
+  ip_address              = "10.0.2.5"
+}
+
+resource "azurerm_lb_backend_address_pool_address" "backend2" {
+  name                    = "${var.my_das}LB_Add_Pool_Add02"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.zadanie5_backend_add_pool.id
+  virtual_network_id      = data.azurerm_virtual_network.zadanie2_vn.id
+  ip_address              = "10.0.2.4"
+}
+
+# Load balancer rules
 
 resource "azurerm_lb_rule" "zadanie5_lb_rule" {
   loadbalancer_id                = azurerm_lb.zadanie5_lb.id
@@ -78,7 +94,7 @@ resource "azurerm_lb_rule" "zadanie5_lb_rule" {
   probe_id                       = azurerm_lb_probe.zadanie5_lb_probe.id
 }
 
-######</LB_RURE_BLOCK>######
+# Outputs
 
 output "load_balancer_id" {
   value = azurerm_lb.zadanie5_lb.id
